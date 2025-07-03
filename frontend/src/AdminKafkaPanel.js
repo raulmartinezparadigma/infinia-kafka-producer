@@ -1,0 +1,110 @@
+import React, { useState } from 'react';
+import { Box, Typography, TextField, Button, Paper, Alert } from '@mui/material';
+
+function generarUUID() {
+  // RFC4122 version 4 compliant
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c === 'x' ? r : ((r & 0x3) | 0x8);
+    return v.toString(16);
+  });
+}
+
+function plantillaProducto(uuid) {
+  return `{
+  "id": "${uuid}",
+  "skuId": "123456789012345678",
+  "type": "SNEAKERS", 
+  "description": "Zapatillas deportivas de ejemplo",
+  "price": 59.99,
+  "size": "42",
+  "imageUrl": "zapatillas_ejemplo.jpg"
+}`;
+}
+
+const AdminKafkaPanel = () => {
+  const [jsonInput, setJsonInput] = useState(plantillaProducto(generarUUID()));
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  const handleSendToKafka = async () => {
+    setResult(null);
+    setError(null);
+    try {
+      const parsed = JSON.parse(jsonInput);
+      const token = localStorage.getItem('admin_jwt');
+      const response = await fetch('/api/admin/kafka/product', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+        },
+        body: JSON.stringify(parsed),
+      });
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(err);
+      }
+      setResult('Producto enviado correctamente a la cola Kafka.');
+    } catch (e) {
+      setError('Error al enviar el producto: ' + e.message);
+    }
+  };
+
+  return (
+    <Box sx={{ maxWidth: 600, m: '40px auto', p: 3 }}>
+      <Paper elevation={3} sx={{ p: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          Alta manual de producto en Kafka
+        </Typography>
+        <Typography variant="body2" gutterBottom>
+          Pega el JSON de un producto válido y pulsa "Enviar a Kafka". El producto se enviará directamente a la cola para procesamiento asíncrono.
+        </Typography>
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Valores válidos para <b>"type"</b>: <code>SNEAKERS</code>, <code>CLOTHING</code>, <code>SUPPLEMENT</code>
+        </Alert>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Typography variant="body2">Selecciona tipo:</Typography>
+          <select
+            value={(() => {
+              try {
+                const parsed = JSON.parse(jsonInput);
+                return parsed.type || '';
+              } catch { return ''; }
+            })()}
+            onChange={e => {
+              try {
+                const parsed = JSON.parse(jsonInput);
+                parsed.type = e.target.value;
+                setJsonInput(JSON.stringify(parsed, null, 2));
+              } catch {}
+            }}
+            style={{ fontSize: '1rem', padding: '4px 8px' }}
+          >
+            <option value="">-- Selecciona --</option>
+            <option value="SNEAKERS">SNEAKERS</option>
+            <option value="CLOTHING">CLOTHING</option>
+            <option value="SUPPLEMENT">SUPPLEMENT</option>
+          </select>
+        </Box>
+        <TextField
+          label="JSON del producto"
+          multiline
+          minRows={8}
+          maxRows={16}
+          fullWidth
+          value={jsonInput}
+          onChange={e => setJsonInput(e.target.value)}
+          variant="outlined"
+          margin="normal"
+        />
+        <Button variant="contained" color="primary" onClick={handleSendToKafka} sx={{ mt: 2 }}>
+          Enviar a Kafka
+        </Button>
+        {result && <Alert severity="success" sx={{ mt: 2 }}>{result}</Alert>}
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      </Paper>
+    </Box>
+  );
+};
+
+export default AdminKafkaPanel;

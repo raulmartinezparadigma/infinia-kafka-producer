@@ -1,0 +1,28 @@
+# Node dependencies
+node_modules/
+
+# Editor/IDE config
+.vscode/
+.windsurf/
+.idea/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de logs y temporales
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Compilados Java (backend)
+backend/target/
+
+# Compilados Java en cualquier subcarpeta
+**/target/
+
+# Otros
+
+# Por defecto, mantenemos package-lock.json y los SVGs generados en public
+# Si quieres excluir más carpetas, añádelas aquí
