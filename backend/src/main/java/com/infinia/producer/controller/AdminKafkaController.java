@@ -24,7 +24,7 @@ public class AdminKafkaController {
      * This endpoint is protected and requires ADMIN role.
      */
     @PostMapping("/product")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> sendProductToKafka(@RequestBody ProductKafkaMessage productKafkaMessage) {
         try {
             if (productKafkaMessage.getSkuId() == null || productKafkaMessage.getSkuId().isBlank()) {

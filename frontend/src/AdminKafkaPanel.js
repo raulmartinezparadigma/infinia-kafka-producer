@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Box, Typography, TextField, Button, Paper, Alert } from '@mui/material';
+import { AuthContext } from './AuthContext';
 
 function generarUUID() {
   // RFC4122 version 4 compliant
@@ -25,18 +26,18 @@ const AdminKafkaPanel = () => {
   const [jsonInput, setJsonInput] = useState(plantillaProducto(generarUUID()));
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const { token, logout } = useContext(AuthContext);
 
   const handleSendToKafka = async () => {
     setResult(null);
     setError(null);
     try {
       const parsed = JSON.parse(jsonInput);
-      const token = localStorage.getItem('admin_jwt');
       const response = await fetch('/api/admin/kafka/product', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+          'Authorization': 'Bearer ' + token
         },
         body: JSON.stringify(parsed),
       });
@@ -53,9 +54,14 @@ const AdminKafkaPanel = () => {
   return (
     <Box sx={{ maxWidth: 600, m: '40px auto', p: 3 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Alta manual de producto en Kafka
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5" gutterBottom>
+            Alta manual de producto en Kafka
+          </Typography>
+          <Button variant="outlined" color="secondary" onClick={logout}>
+            Cerrar Sesión
+          </Button>
+        </Box>
         <Typography variant="body2" gutterBottom>
           Pega el JSON de un producto válido y pulsa "Enviar a Kafka". El producto se enviará directamente a la cola para procesamiento asíncrono.
         </Typography>

@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
  * Producer service to send product messages to Kafka.
  */
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class ProductProducer {
 
     private static final String PRODUCT_TOPIC = "products-topic";
