@@ -19,30 +19,38 @@ Este plan detalla los pasos para integrar un sistema de generación de imágenes
         *   DTOs (`ImageRequest`, `ImageResponse`): Para manejar los datos de entrada y salida.
     *   **Verificación**: El usuario revisará y aprobará cada una de las nuevas clases.
 
-4.  **Proteger el Endpoint**:
+4.  **Implementar Constructor de Prompts (Prompt Builder)**:
+    *   **Acción**: Dentro de `ImageGenerationService`, proponer la creación de un método privado que enriquezca la descripción del producto.
+        *   Recibirá la descripción básica del producto (ej: "Zapatillas rosas").
+        *   Añadirá palabras clave de estilo predefinidas para asegurar una alta calidad visual (ej: "fotografía de producto profesional, fondo minimalista, 8k").
+        *   Opcional (a evaluar): Traducirá la descripción al inglés para mejorar la precisión del modelo.
+        *   El método `generateImage` del servicio usará este constructor para crear el prompt final antes de enviarlo a la API.
+    *   **Verificación**: El usuario revisará la lógica del constructor de prompts.
+
+5.  **Proteger el Endpoint**:
     *   **Acción**: Proponer la modificación de `SecurityConfig.java` para asegurar que el nuevo endpoint solo sea accesible para usuarios con el rol `ADMIN`.
     *   **Verificación**: El usuario revisará y aprobará los cambios en la configuración de seguridad.
 
 **Fase 2: Frontend - Integración en la Interfaz de Administrador**
 
-5.  **Crear Servicio de API en Frontend**:
+6.  **Crear Servicio de API en Frontend**:
     *   **Acción**: Proponer la creación de una nueva función en un archivo de servicios de API (ej. `api.js`) para llamar al nuevo endpoint del backend.
     *   **Verificación**: El usuario revisará y aprobará el nuevo código del servicio.
 
-6.  **Modificar Componente del Formulario**:
+7.  **Modificar Componente del Formulario**:
     *   **Acción**: Proponer la modificación del componente de React que contiene el formulario de alta de producto (`AdminPanel.js` o similar). Se añadirá:
         *   Un nuevo campo de texto para la descripción (o se usará el existente en el JSON).
         *   Un botón "Generar Imagen con IA".
         *   Un estado para almacenar la URL de la imagen generada y un visor para mostrarla.
     *   **Verificación**: El usuario revisará y aprobará los cambios en el componente de React.
 
-7.  **Actualizar Lógica del Componente**:
+8.  **Actualizar Lógica del Componente**:
     *   **Acción**: Proponer la lógica para que, al hacer clic en el nuevo botón, se llame al servicio de API, se reciba la URL de la imagen y se actualice automáticamente el campo `imageUrl` en el `textarea` del JSON.
     *   **Verificación**: El usuario revisará y aprobará la lógica añadida al componente.
 
 **Fase 3: Migración Futura a Google Cloud (Opcional)**
 
-8.  **Cambiar Proveedor de IA**:
+9.  **Cambiar Proveedor de IA**:
     *   **Contexto**: Este paso se ejecutará en el futuro, una vez que se disponga de acceso para crear y gestionar proyectos en Google Cloud Platform.
     *   **Acción**:
         *   Añadir las dependencias del SDK de Google Cloud para Java en `pom.xml`.

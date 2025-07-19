@@ -32,6 +32,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
+
+        // Si la ruta es pública, no aplicamos el filtro y continuamos
+        if (request.getServletPath().contains("/api/auth") || request.getServletPath().contains("/generated-images")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
@@ -50,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             username = jwtService.extractUsername(jwt);
         } catch (Exception e) {
-            log.error("Error extracting username from JWT", e);
+            log.warn("Could not parse JWT token: {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }

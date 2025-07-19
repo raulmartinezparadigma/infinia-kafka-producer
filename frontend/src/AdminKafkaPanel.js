@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { Box, Typography, TextField, Button, Paper, Alert } from '@mui/material';
+import { Box, Typography, TextField, Button, Paper, Alert, CircularProgress } from '@mui/material';
 import { AuthContext } from './AuthContext';
 
 function generarUUID() {
@@ -26,7 +26,55 @@ const AdminKafkaPanel = () => {
   const [jsonInput, setJsonInput] = useState(plantillaProducto(generarUUID()));
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [imageGenLoading, setImageGenLoading] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+  const [imageGenError, setImageGenError] = useState(null);
   const { token, logout } = useContext(AuthContext);
+
+  const handleGenerateImage = async () => {
+    setImageGenLoading(true);
+    setGeneratedImageUrl(null);
+    setImageGenError(null);
+
+    try {
+      const parsed = JSON.parse(jsonInput);
+      const description = parsed.description;
+
+      if (!description) {
+        throw new Error('El campo "description" del JSON no puede estar vacío.');
+      }
+
+      const response = await fetch('/api/ai/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ description }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || 'Error en el servidor al generar la imagen.');
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.imageUrl) {
+        setGeneratedImageUrl(result.imageUrl);
+        // Actualizar el JSON en el editor
+        const updatedParsed = { ...parsed, imageUrl: result.imageUrl };
+        setJsonInput(JSON.stringify(updatedParsed, null, 2));
+      } else {
+        throw new Error('La API no devolvió una imagen válida.');
+      }
+
+    } catch (e) {
+      setImageGenError('Error al generar la imagen: ' + e.message);
+    } finally {
+      setImageGenLoading(false);
+    }
+  };
 
   const handleSendToKafka = async () => {
     setResult(null);
@@ -103,9 +151,30 @@ const AdminKafkaPanel = () => {
           variant="outlined"
           margin="normal"
         />
-        <Button variant="contained" color="primary" onClick={handleSendToKafka} sx={{ mt: 2 }}>
-          Enviar a Kafka
-        </Button>
+        <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <Button variant="contained" color="secondary" onClick={handleGenerateImage} disabled={imageGenLoading}>
+            {imageGenLoading ? 'Generando...' : 'Generar Imagen con IA'}
+          </Button>
+          <Button variant="contained" color="primary" onClick={handleSendToKafka}>
+            Enviar a Kafka
+          </Button>
+        </Box>
+
+        {imageGenError && <Alert severity="error" sx={{ mt: 2 }}>{imageGenError}</Alert>}
+        
+        {imageGenLoading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+            <CircularProgress />
+          </Box>
+        )}
+
+        {generatedImageUrl && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle1">Imagen Generada:</Typography>
+            <img src={generatedImageUrl} alt="Producto generado por IA" style={{ width: '100%', borderRadius: '4px', marginTop: '8px' }} />
+          </Box>
+        )}
+
         {result && <Alert severity="success" sx={{ mt: 2 }}>{result}</Alert>}
         {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
       </Paper>
