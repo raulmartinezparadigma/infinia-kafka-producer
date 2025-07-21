@@ -1,6 +1,6 @@
 package com.infinia.producer.security;
 
-import com.infinia.producer.service.AdminUserDetailsService;
+import com.infinia.producer.service.DatabaseUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +24,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final AdminUserDetailsService adminUserDetailsService;
+    private final DatabaseUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -64,19 +64,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("Username extracted from JWT: {}", username);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = null;
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-            List<String> rolesInToken = jwtService.extractClaim(jwt, claims -> claims.get("roles", List.class));
-            log.info("Roles extracted from JWT: {}", rolesInToken);
-
-            if (rolesInToken != null && rolesInToken.contains("ROLE_ADMIN")) {
-                log.info("User has ROLE_ADMIN. Loading user details...");
-                userDetails = this.adminUserDetailsService.loadUserByUsername(username);
-            } else {
-                log.warn("User does not have ROLE_ADMIN or roles claim is missing.");
-            }
-
-            if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
+            if (jwtService.isTokenValid(jwt, userDetails)) {
                 log.info("Token is valid. Setting authentication in SecurityContext.");
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,

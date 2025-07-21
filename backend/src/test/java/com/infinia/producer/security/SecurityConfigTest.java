@@ -1,6 +1,6 @@
 package com.infinia.producer.security;
 
-import com.infinia.producer.service.AdminUserDetailsService;
+import com.infinia.producer.service.DatabaseUserDetailsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -21,7 +23,7 @@ class SecurityConfigTest {
     private JwtAuthenticationFilter jwtAuthFilter;
 
     @Mock
-    private AdminUserDetailsService adminUserDetailsService;
+    private DatabaseUserDetailsService userDetailsService;
 
     @InjectMocks
     private SecurityConfig securityConfig;
@@ -44,13 +46,13 @@ class SecurityConfigTest {
         securityConfig.securityFilterChain(httpSecurity);
 
         // Assert
-        // Verifica que la seguridad se aplica solo al matcher /api/**
-        verify(httpSecurity).securityMatcher("/api/**");
-
         // Verifica que las rutas de auth son públicas y el resto están autenticadas
         verify(httpSecurity).authorizeHttpRequests(any());
 
         // Verifica que se añade el filtro JWT
         verify(httpSecurity).addFilterBefore(eq(jwtAuthFilter), any());
+
+        // Verifica que el securityMatcher ya no se utiliza
+        verify(httpSecurity, never()).securityMatcher(anyString());
     }
 }

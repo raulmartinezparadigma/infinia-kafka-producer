@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "admin_users")
-public class AdminUser {
+@Table(name = "users")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +26,6 @@ public class AdminUser {
 
     private boolean enabled;
 
-    @Column(nullable = true) // Allow null to prevent DDL error on existing data
+    @Column(nullable = true)
     private String roles;
 }
