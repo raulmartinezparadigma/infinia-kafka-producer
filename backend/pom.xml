@@ -145,6 +145,13 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>com/infinia/producer/kafka/dto/**</exclude>
+                                <exclude>com/infinia/producer/dto/**</exclude>
+                                <exclude>com/infinia/producer/model/**</exclude>
+                            </excludes>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -49,6 +49,7 @@ class JwtAuthenticationFilterTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         SecurityContextHolder.setContext(securityContext);
+        when(request.getServletPath()).thenReturn("/api/some-path");
 
         userDetails = User.withUsername("testuser")
                 .password("password")

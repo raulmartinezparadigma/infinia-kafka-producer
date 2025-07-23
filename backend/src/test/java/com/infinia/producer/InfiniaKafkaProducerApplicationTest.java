@@ -8,7 +8,9 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(properties = {
     "stability.api.key=dummy-test-key",
     "app.jwt.secret=dummy-super-secret-key-for-testing-purposes-only-1234567890",
-    "app.jwt.expiration=86400000" // 24 hours in ms for testing
+    "app.jwt.expiration=86400000", // 24 hours in ms for testing
+    "cloudflare.account.id=dummy-account-id",
+    "cloudflare.api.token=dummy-api-token"
 })
 class InfiniaKafkaProducerApplicationTest {
 
