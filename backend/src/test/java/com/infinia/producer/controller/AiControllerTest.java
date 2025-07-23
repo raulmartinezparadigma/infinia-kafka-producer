@@ -43,7 +43,7 @@ class AiControllerTest {
         ImageGenerationRequest request = new ImageGenerationRequest();
         request.setDescription("A cat sitting on a mat");
 
-        ImageGenerationResponse serviceResponse = new ImageGenerationResponse(true, "base64-encoded-image-string");
+        ImageGenerationResponse serviceResponse = new ImageGenerationResponse(true, "/generated-images/a_cat_sitting_on_a_mat.png");
         when(imageGenerationService.generateImage(anyString())).thenReturn(serviceResponse);
 
         // When & Then
@@ -52,6 +52,6 @@ class AiControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.imageBase64").value("base64-encoded-image-string"));
+                .andExpect(jsonPath("$.imageUrl").value("/generated-images/a_cat_sitting_on_a_mat.png"));
     }
 }
