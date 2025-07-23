@@ -27,13 +27,13 @@ const AdminKafkaPanel = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [imageGenLoading, setImageGenLoading] = useState(false);
-  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+  const [generatedImageBase64, setGeneratedImageBase64] = useState(null);
   const [imageGenError, setImageGenError] = useState(null);
   const { token, logout } = useContext(AuthContext);
 
   const handleGenerateImage = async () => {
     setImageGenLoading(true);
-    setGeneratedImageUrl(null);
+    setGeneratedImageBase64(null);
     setImageGenError(null);
 
     try {
@@ -60,10 +60,11 @@ const AdminKafkaPanel = () => {
 
       const result = await response.json();
 
-      if (result.success && result.imageUrl) {
-        setGeneratedImageUrl(result.imageUrl);
-        // Actualizar el JSON en el editor
-        const updatedParsed = { ...parsed, imageUrl: result.imageUrl };
+      if (result.success && result.imageBase64) {
+        setGeneratedImageBase64(result.imageBase64);
+        // Actualizar el JSON en el editor con el Data URL completo
+        const dataUrl = `data:image/png;base64,${result.imageBase64}`;
+        const updatedParsed = { ...parsed, imageUrl: dataUrl };
         setJsonInput(JSON.stringify(updatedParsed, null, 2));
       } else {
         throw new Error('La API no devolvió una imagen válida.');
@@ -168,10 +169,10 @@ const AdminKafkaPanel = () => {
           </Box>
         )}
 
-        {generatedImageUrl && (
+        {generatedImageBase64 && (
           <Box sx={{ mt: 2 }}>
             <Typography variant="subtitle1">Imagen Generada:</Typography>
-            <img src={generatedImageUrl} alt="Producto generado por IA" style={{ width: '100%', borderRadius: '4px', marginTop: '8px' }} />
+            <img src={`data:image/png;base64,${generatedImageBase64}`} alt="Producto generado por IA" style={{ width: '100%', borderRadius: '4px', marginTop: '8px' }} />
           </Box>
         )}
 

@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageGenerationResponse {
+
     private boolean success;
-    private String imageUrl;
+    private String imageBase64;
+
 }
