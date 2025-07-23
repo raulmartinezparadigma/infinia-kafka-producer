@@ -9,8 +9,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.util.Base64;
+import java.util.regex.Pattern;
 
 @Service
 public class ImageGenerationService {
@@ -50,18 +56,30 @@ public class ImageGenerationService {
                 return new ImageGenerationResponse(false, null);
             }
 
-            // La API de Cloudflare devuelve un JSON que contiene la imagen en Base64
             String responseBody = response.body().string();
             JsonObject jsonResponse = gson.fromJson(responseBody, JsonObject.class);
-
-            // Extraer la imagen del campo anidado
             String base64Image = jsonResponse.getAsJsonObject("result").get("image").getAsString();
 
-            logger.info("Imagen generada exitosamente con Cloudflare AI.");
-            return new ImageGenerationResponse(true, base64Image);
+            // Decodificar y guardar la imagen
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            String fileName = generateSlug(description) + ".png";
+
+            String projectRoot = new File(".").getCanonicalPath();
+            Path imageFolderPath = Paths.get(projectRoot, "..", "infinia-images");
+
+            if (!Files.exists(imageFolderPath)) {
+                Files.createDirectories(imageFolderPath);
+            }
+
+            Path imagePath = imageFolderPath.resolve(fileName);
+            Files.write(imagePath, imageBytes);
+
+            String imageUrl = "/generated-images/" + fileName;
+            logger.info("Imagen generada y guardada en: {}", imageUrl);
+            return new ImageGenerationResponse(true, imageUrl);
 
         } catch (IOException e) {
-            logger.error("Error de IO al llamar a la API de Cloudflare", e);
+            logger.error("Error de IO al llamar a la API de Cloudflare o al guardar la imagen", e);
             return new ImageGenerationResponse(false, null);
         }
     }
@@ -69,5 +87,17 @@ public class ImageGenerationService {
     private String buildPrompt(String baseDescription) {
         String styleEnhancers = ", product photography, professional, high quality, 8k, photorealistic, studio lighting, minimalist background";
         return baseDescription + styleEnhancers;
+    }
+
+    private String generateSlug(String input) {
+        // Normalizar para quitar acentos
+        String noAccents = Normalizer.normalize(input, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        noAccents = pattern.matcher(noAccents).replaceAll("");
+
+        // Reemplazar espacios y caracteres no alfanuméricos por guiones bajos
+        return noAccents.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "_");
     }
 }

@@ -1,15 +1,15 @@
 package com.infinia.producer.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
 public class ImageGenerationResponse {
 
     private boolean success;
-    private String imageBase64;
+    private String imageUrl;
 
 }

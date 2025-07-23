@@ -45,10 +45,10 @@ class ImageGenerationServiceTest {
     }
 
     @Test
-    void generateImage_shouldReturnSuccess_whenApiCallIsSuccessful() throws IOException {
+    void generateImage_shouldReturnSuccessWithImageUrl_whenApiCallIsSuccessful() throws IOException {
         // Arrange
         String description = "a cat";
-        String base64Image = "dGVzdC1pbWFnZQ==";
+        String base64Image = "dGVzdC1pbWFnZQ=="; // "test-image" en Base64
 
         JsonObject result = new JsonObject();
         result.addProperty("image", base64Image);
@@ -66,7 +66,7 @@ class ImageGenerationServiceTest {
 
         // Assert
         assertTrue(resultResponse.isSuccess());
-        assertEquals(base64Image, resultResponse.getImageBase64());
+        assertEquals("/generated-images/a_cat.png", resultResponse.getImageUrl());
     }
 
     @Test
@@ -85,7 +85,7 @@ class ImageGenerationServiceTest {
 
         // Assert
         assertFalse(resultResponse.isSuccess());
-        assertNull(resultResponse.getImageBase64());
+        assertNull(resultResponse.getImageUrl());
     }
 
     @Test
@@ -101,6 +101,6 @@ class ImageGenerationServiceTest {
 
         // Assert
         assertFalse(resultResponse.isSuccess());
-        assertNull(resultResponse.getImageBase64());
+        assertNull(resultResponse.getImageUrl());
     }
 }
