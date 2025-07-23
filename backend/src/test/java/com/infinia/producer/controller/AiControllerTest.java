@@ -43,7 +43,7 @@ class AiControllerTest {
         ImageGenerationRequest request = new ImageGenerationRequest();
         request.setDescription("A cat sitting on a mat");
 
-        ImageGenerationResponse serviceResponse = new ImageGenerationResponse(true, "/generated-images/a_cat_sitting_on_a_mat.png");
+        ImageGenerationResponse serviceResponse = new ImageGenerationResponse(true, "http://localhost:8081/generated-images/a_cat_sitting_on_a_mat.png");
         when(imageGenerationService.generateImage(anyString())).thenReturn(serviceResponse);
 
         // When & Then
@@ -52,6 +52,6 @@ class AiControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.imageUrl").value("/generated-images/a_cat_sitting_on_a_mat.png"));
+                .andExpect(jsonPath("$.imageUrl").value("http://localhost:8081/generated-images/a_cat_sitting_on_a_mat.png"));
     }
 }

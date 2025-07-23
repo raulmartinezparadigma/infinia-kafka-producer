@@ -30,6 +30,9 @@ public class ImageGenerationService {
     @Value("${cloudflare.api.token}")
     private String apiToken;
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     private final OkHttpClient httpClient = new OkHttpClient();
     private final Gson gson = new Gson();
 
@@ -43,13 +46,13 @@ public class ImageGenerationService {
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(jsonBody.toString(), mediaType);
 
-        Request request = new Request.Builder()
+        Request requestApi = new Request.Builder()
                 .url(apiUrl)
                 .post(body)
                 .addHeader("Authorization", "Bearer " + apiToken)
                 .build();
 
-        try (Response response = httpClient.newCall(request).execute()) {
+        try (Response response = httpClient.newCall(requestApi).execute()) {
             if (!response.isSuccessful()) {
                 String errorBody = response.body() != null ? response.body().string() : "Unknown error";
                 logger.error("Error en la API de Cloudflare: {} - {}", response.code(), errorBody);
@@ -74,7 +77,7 @@ public class ImageGenerationService {
             Path imagePath = imageFolderPath.resolve(fileName);
             Files.write(imagePath, imageBytes);
 
-            String imageUrl = "/generated-images/" + fileName;
+            String imageUrl = baseUrl + "/generated-images/" + fileName;
             logger.info("Imagen generada y guardada en: {}", imageUrl);
             return new ImageGenerationResponse(true, imageUrl);
 

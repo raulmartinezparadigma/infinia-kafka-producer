@@ -29,12 +29,12 @@ public class DatabaseUserDetailsService implements UserDetailsService {
         List<SimpleGrantedAuthority> authorities;
 
         if (roles == null || roles.trim().isEmpty()) {
-            // Asignar ROLE_ADMIN por defecto si no hay roles especificados
+            // Asignar ADMIN por defecto si no hay roles especificados
             authorities = Collections.singletonList(new SimpleGrantedAuthority("ADMIN"));
         } else {
             authorities = Arrays.stream(roles.split(","))
                     .map(String::trim)
-                    .map(SimpleGrantedAuthority::new)
+                    .map(SimpleGrantedAuthority::new) // Crea la autoridad con el nombre exacto del rol (ej: "ADMIN")
                     .collect(Collectors.toList());
         }
 

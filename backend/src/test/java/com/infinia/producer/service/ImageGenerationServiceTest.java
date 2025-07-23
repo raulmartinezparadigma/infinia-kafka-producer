@@ -42,6 +42,7 @@ class ImageGenerationServiceTest {
         ReflectionTestUtils.setField(imageGenerationService, "accountId", "test-account-id");
         ReflectionTestUtils.setField(imageGenerationService, "apiToken", "test-api-token");
         ReflectionTestUtils.setField(imageGenerationService, "httpClient", httpClient);
+        ReflectionTestUtils.setField(imageGenerationService, "baseUrl", "http://localhost:8081");
     }
 
     @Test
@@ -66,7 +67,7 @@ class ImageGenerationServiceTest {
 
         // Assert
         assertTrue(resultResponse.isSuccess());
-        assertEquals("/generated-images/a_cat.png", resultResponse.getImageUrl());
+        assertEquals("http://localhost:8081/generated-images/a_cat.png", resultResponse.getImageUrl());
     }
 
     @Test
